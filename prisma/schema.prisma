@@ -13,3 +13,50 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// User roles enum
+enum UserRole {
+  user
+  admin
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  email          String         @unique
+  username       String         @unique
+  password       String
+  role           UserRole       @default(user)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  weatherQueries WeatherQuery[]
+}
+
+model WeatherQuery {
+  id          Int          @id @default(autoincrement())
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  city        String
+  queryTime   DateTime     @default(now())
+  WeatherData WeatherData? // Optional one-to-one relation
+
+  @@index([userId])
+  @@index([userId, queryTime]) // Index for optimizing queries by user and query time
+  @@index([city, queryTime]) // Index for optimizing queries by city and query time
+}
+
+model WeatherData {
+  id             Int          @id @default(autoincrement())
+  weatherQuery   WeatherQuery @relation(fields: [weatherQueryId], references: [id])
+  weatherQueryId Int          @unique
+  main           String
+  description    String
+  icon           String
+  temperature    Float
+  feelsLike      Float
+  humidity       Float
+  tempMax        Float
+  tempMin        Float
+  createdAt      DateTime     @default(now())
+
+  @@index([weatherQueryId])
+}
