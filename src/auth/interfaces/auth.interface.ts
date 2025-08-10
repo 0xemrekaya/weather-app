@@ -58,12 +58,6 @@ export class LoginResponse {
 
 export class RegisterResponse {
     @ApiProperty({ 
-        description: 'JWT access token',
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-    })
-    token: string;
-
-    @ApiProperty({ 
         description: 'User information',
         type: () => UserResponseData
     })

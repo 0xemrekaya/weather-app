@@ -121,7 +121,6 @@ export class AuthService {
             const token = this.jwtService.sign(payload);
 
             const registerResponse: RegisterResponse = {
-                token,
                 user: {
                     id: user.id,
                     username: user.username,
