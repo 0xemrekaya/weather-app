@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../../common/interfaces/user.interface';
 import * as bcrypt from 'bcrypt';
 import { UserRoles } from '../../common/enums/user.enum';
@@ -11,6 +11,7 @@ import { GetAllUserResponse } from './dto/get-all-user-response.dto';
 
 @Injectable()
 export class UserService {
+    private readonly logger = new Logger(UserService.name);
     private readonly saltRounds: number;
 
     constructor(
@@ -18,7 +19,7 @@ export class UserService {
         private readonly jwtConfig: JwtConfig
     ) {
         this.saltRounds = this.jwtConfig.saltRounds;
-        console.log('Salt rounds initialized:', this.saltRounds, typeof this.saltRounds);
+        this.logger.log(`UserService initialized with salt rounds: ${this.saltRounds}`);
     }
 
     /**
@@ -85,10 +86,13 @@ export class UserService {
      */
     async createUser(userData: CreateUserInput): Promise<CreateUserResponse> {
         const { email, username, password, role } = userData;
+        
+        this.logger.log(`Creating new user with username: ${username}, email: ${email}, role: ${role}`);
 
         // Check if user already exists
         const userExists = await this.findByEmailOrUsername(email, username);
         if (userExists) {
+            this.logger.warn(`User creation failed: User with email ${email} or username ${username} already exists`);
             throw new ConflictException('User with this email or username already exists');
         }
 
@@ -112,6 +116,8 @@ export class UserService {
                 updatedAt: true,
             }
         });
+
+        this.logger.log(`User created successfully: ${username} (ID: ${user.id}, Role: ${user.role})`);
 
         return {
             user: {

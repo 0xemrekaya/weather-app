@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Query, UseGuards, Request, Post, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Logger, Query, UseGuards, Request, Post, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { WeatherRequest } from './dto/weather-request.dto';
 import { WeatherService } from './weather.service';
@@ -14,6 +14,8 @@ import { WeatherResponse } from './dto/weather-response.dto';
 @Controller('weather')
 @UseGuards(JwtGuard)
 export class WeatherController {
+    private readonly logger = new Logger(WeatherController.name);
+    
     constructor(private readonly weatherService: WeatherService) { }
 
     @Get()
@@ -21,7 +23,10 @@ export class WeatherController {
     @ApiWeatherSwagger()
     async getWeather(@Query() weatherDto: WeatherRequest, @Request() req: any): Promise<WeatherResponse> {
         const userId = req.user.id; // JWT payload contains user ID as 'sub'
-        return this.weatherService.getWeatherData(weatherDto, userId);
+        this.logger.log(`Weather request received from user ${userId} for ${weatherDto.city}, ${weatherDto.country}`);
+        const result = await this.weatherService.getWeatherData(weatherDto, userId);
+        this.logger.log(`Weather request completed for user ${userId}`);
+        return result;
     }
 
     @Get('history')
@@ -29,6 +34,7 @@ export class WeatherController {
     @ApiGetUserselfWeatherHistorySwagger()
     async getUserselfWeatherHistory(@Request() req: any): Promise<UserWeatherResponse> {
         const userId = req.user.id;
+        this.logger.log(`Weather history request from user ${userId}`);
         return this.weatherService.getUserWeatherQueries(userId);
     }
 
@@ -38,6 +44,7 @@ export class WeatherController {
     @HttpCode(HttpStatus.OK)
     @ApiGetUserselfWeatherHistorySwagger()
     async getCustomUserWeatherHistory(@Param('id', ParseIntPipe) userId: number): Promise<UserWeatherResponse> {
+        this.logger.log(`Admin weather history request for user ${userId}`);
         return this.weatherService.getUserWeatherQueries(userId);
     }
 

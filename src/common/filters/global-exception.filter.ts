@@ -65,10 +65,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
 
         // Log the error for debugging
-        // this.logger.error(
-        //     `${request.method} ${request.url} - ${status} ${error}`,
-        //     exception instanceof Error ? exception.stack : exception,
-        // );
+        if (status >= 500) {
+            // Log internal server errors as errors
+            this.logger.error(
+                `${request.method} ${request.url} - ${status} ${error}: ${message}`,
+                exception instanceof Error ? exception.stack : String(exception),
+            );
+        } else if (status >= 400) {
+            // Log client errors as warnings
+            this.logger.warn(
+                `${request.method} ${request.url} - ${status} ${error}: ${message}`,
+            );
+        } else {
+            // Log other responses as debug
+            this.logger.debug(
+                `${request.method} ${request.url} - ${status} ${error}: ${message}`,
+            );
+        }
 
         // Send consistent error response
         response.status(status).json({

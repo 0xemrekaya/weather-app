@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtGuard } from '../../common/guards/jwt.guard';
@@ -14,6 +14,8 @@ import { GetAllUserResponse } from './dto/get-all-user-response.dto';
 @Controller('users')
 @ApiBearerAuth()
 export class UserController {
+    private readonly logger = new Logger(UserController.name);
+    
     constructor(private readonly userService: UserService) {}
 
     @Get()
@@ -22,7 +24,10 @@ export class UserController {
     @ApiGetUserAllSwagger()
     @HttpCode(HttpStatus.OK)
     async getAllUsers(): Promise<GetAllUserResponse[]> {
-        return await this.userService.getAllUsers();
+        this.logger.log('Admin request to get all users');
+        const users = await this.userService.getAllUsers();
+        this.logger.log(`Returned ${users.length} users to admin`);
+        return users;
     }
 
     @Post('create-user')
@@ -31,7 +36,10 @@ export class UserController {
     @ApiCreateUserSwagger()
     @HttpCode(HttpStatus.CREATED)
     async createUser(@Body() createUserDto: CreateUserRequest): Promise<CreateUserResponse> {
-        return await this.userService.createUser(createUserDto);
+        this.logger.log(`Admin request to create user: ${createUserDto.username}`);
+        const result = await this.userService.createUser(createUserDto);
+        this.logger.log(`User creation completed: ${createUserDto.username}`);
+        return result;
     }
 
 }

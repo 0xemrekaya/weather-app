@@ -31,6 +31,8 @@ export class WeatherService {
 
     async getWeatherData(weatherDto: WeatherRequest, userId: number): Promise<WeatherResponse> {
         try {
+            this.logger.log(`Fetching weather data for user ${userId}: ${weatherDto.city}, ${weatherDto.country}`);
+            
             // Step 1: Check cache first
             const cachedWeather = await this.cacheService.getWeatherCache(weatherDto.city, weatherDto.country);
             if (cachedWeather) {
@@ -39,6 +41,8 @@ export class WeatherService {
                 return this.mapToWeatherResponse(cachedWeather);
             }
 
+            this.logger.log(`Fetching fresh data from OpenWeather API for ${weatherDto.city}, ${weatherDto.country}`);
+            
             // Step 2: Get coordinates from geocoding API
             const coordinates = await this.getCoordinates(weatherDto);
 
@@ -54,12 +58,24 @@ export class WeatherService {
             // Step 5: Save query and weather data to database
             await this.saveWeatherQuery(userId, weatherDto, weatherData);
 
+            this.logger.log(`Weather data successfully processed for ${weatherDto.city}, ${weatherDto.country}`);
             return weatherData;
         } catch (error) {
-            this.logger.error(`Failed to fetch weather data for user ${userId}:`, error);
+            // Differentiate between client errors (4xx) and server errors (5xx)
             if (error instanceof HttpException) {
+                const status = error.getStatus();
+                if (status >= 400 && status < 500) {
+                    // Client errors: log as warn (bad request, not found, etc.)
+                    this.logger.warn(`Client error for user ${userId}: ${error.message}`);
+                } else {
+                    // Server errors: log as error
+                    this.logger.error(`Server error for user ${userId}:`, error);
+                }
                 throw error;
             }
+            
+            // Unexpected errors: log as error
+            this.logger.error(`Unexpected error fetching weather data for user ${userId}:`, error);
             throw new HttpException(
                 'Failed to fetch weather data',
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -69,6 +85,8 @@ export class WeatherService {
 
     private async getCoordinates(weatherDto: WeatherRequest): Promise<GeocodingResponse> {
         try {
+            this.logger.debug(`Geocoding location: ${weatherDto.city}, ${weatherDto.country}`);
+            
             // Build query string for geocoding
             let query = weatherDto.city + ',' + weatherDto.country;
             const url = `${this.geocodingUrl}?q=${encodeURIComponent(query)}&limit=1&appid=${this.apiKey}`;
@@ -78,13 +96,16 @@ export class WeatherService {
             );
 
             if (!response.data || response.data.length === 0) {
+                this.logger.warn(`Location not found: ${weatherDto.city}, ${weatherDto.country}`);
                 throw new HttpException(
                     'Location not found',
                     HttpStatus.NOT_FOUND,
                 );
             }
 
-            return response.data[0];
+            const coordinates = response.data[0];
+            this.logger.debug(`Coordinates found for ${weatherDto.city}: lat=${coordinates.lat}, lon=${coordinates.lon}`);
+            return coordinates;
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;
@@ -314,13 +335,18 @@ export class WeatherService {
                 total: transformedQueries.length
             };
         } catch (error) {
-            this.logger.error(`Failed to get user weather queries for user ${userId}:`, error);
-
-            // If it's already an HttpException, re-throw it
+            // Differentiate between expected business logic errors and system errors
             if (error instanceof HttpException) {
+                if (error.getStatus() === HttpStatus.NOT_FOUND) {
+                    this.logger.warn(`User ${userId} not found for weather history request`);
+                } else {
+                    this.logger.warn(`Business logic error for user ${userId}: ${error.message}`);
+                }
                 throw error;
             }
 
+            // Log unexpected system errors as ERROR
+            this.logger.error(`Failed to get user weather queries for user ${userId}:`, error);
             throw new HttpException(
                 'Failed to retrieve weather query history',
                 HttpStatus.INTERNAL_SERVER_ERROR,
