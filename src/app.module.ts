@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { DatabaseModule } from './database/database.module';
-import { WeatherModule } from './weather/weather.module';
-import { CacheModule } from './cache/cache.module';
+import { UserModule } from './module/user/user.module';
+import { WeatherModule } from './module/weather/weather.module';
+import { CacheModule } from './module/cache/cache.module';
+import { ConfigModule } from './module/config/config.module';
+import { AuthModule } from './module/auth/auth.module';
+import { DatabaseModule } from './module/database/database.module';
 
 @Module({
-  imports: [UserModule, AuthModule, DatabaseModule, WeatherModule, CacheModule],
+  imports: [ConfigModule, UserModule, AuthModule, DatabaseModule, WeatherModule, CacheModule],
   controllers: [],
   providers: [],
 })

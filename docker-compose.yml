@@ -1,4 +1,5 @@
 services:
+  # Postgres service
   postgres:
     image: postgres:17
     container_name: weather-app-postgres
@@ -12,5 +13,16 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  # Redis service
+  redis:
+    image: redis:8-alpine
+    container_name: weather-app-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
 volumes:
   postgres_data:
+  redis_data:
