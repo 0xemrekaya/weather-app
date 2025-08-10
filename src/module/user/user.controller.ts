@@ -4,32 +4,33 @@ import { UserService } from './user.service';
 import { JwtGuard } from '../../common/guards/jwt.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRoles } from 'src/common/enums/user.enum';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ApiGetUserAllSwagger, ApiRegisterSwagger } from './decorators/swagger.decorator';
-import { UserResponseData } from 'src/common/dto/user-response.dto';
+import { CreateUserRequest } from './dto/create-user-request.dto';
+import { ApiGetUserAllSwagger, ApiCreateUserSwagger } from './decorators/swagger.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { CreateUserResponse } from './dto/create-user-response.dto';
+import { GetAllUserResponse } from './dto/get-all-user-response.dto';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiBearerAuth()
 export class UserController {
-    constructor(private readonly userService: UserService) { }
+    constructor(private readonly userService: UserService) {}
 
     @Get()
     @UseGuards(JwtGuard, RolesGuard)
     @Roles(UserRoles.admin)
     @ApiGetUserAllSwagger()
     @HttpCode(HttpStatus.OK)
-    async getAllUsers(): Promise<UserResponseData[]> {
+    async getAllUsers(): Promise<GetAllUserResponse[]> {
         return await this.userService.getAllUsers();
     }
 
     @Post('create-user')
     @UseGuards(JwtGuard, RolesGuard)
     @Roles(UserRoles.admin)
-    @ApiRegisterSwagger()
+    @ApiCreateUserSwagger()
     @HttpCode(HttpStatus.CREATED)
-    async createUser(@Body() createUserDto: CreateUserDto): Promise<UserResponseData> {
+    async createUser(@Body() createUserDto: CreateUserRequest): Promise<CreateUserResponse> {
         return await this.userService.createUser(createUserDto);
     }
 

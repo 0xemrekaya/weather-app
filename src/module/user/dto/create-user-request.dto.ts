@@ -9,7 +9,7 @@ import { UserRoles } from 'src/common/enums/user.enum';
  @password: User's chosen password
  @role: User's role (UserRole enum)
 */
-export class CreateUserDto {
+export class CreateUserRequest {
     @ApiProperty({ example: 'user@example.com' })
     @IsEmail()
     @IsNotEmpty()

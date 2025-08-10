@@ -21,7 +21,14 @@ export class JwtConfig {
     }
 
     get saltRounds(): number {
-        return this.configService.get<number>('JWT_SALT_ROUNDS', 12);
+        const saltRounds = this.configService.get<string>('JWT_SALT_ROUNDS', '12');
+        const numericSaltRounds = parseInt(saltRounds, 10);
+        
+        if (isNaN(numericSaltRounds) || numericSaltRounds < 4 || numericSaltRounds > 31) {
+            throw new Error('JWT_SALT_ROUNDS must be a number between 4 and 31');
+        }
+        
+        return numericSaltRounds;
     }
 
     get jwtConfig() {

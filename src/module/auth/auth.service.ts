@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { LoginDto } from './dto/login.dto';
+import { LoginRequest } from './dto/login-request.dto';
 import { JwtPayload } from './interfaces/jwt.interface';
 import { UserRoles } from 'src/common/enums/user.enum';
 import { LoginResponse } from './dto/login-response.dto';
@@ -18,7 +18,7 @@ export class AuthService {
     * Authenticate user and return JWT token
     * Supports both admin and user roles for RBAC
     */
-    async login(loginDto: LoginDto): Promise<LoginResponse> {
+    async login(loginDto: LoginRequest): Promise<LoginResponse> {
         const { username, password } = loginDto;
 
         // Find user with password for authentication

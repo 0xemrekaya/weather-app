@@ -1,14 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { GeocodingResponse } from './interfaces/geocoding.interface';
-import { WeatherDto } from './dto/weather.dto';
+import { WeatherRequest } from './dto/weather-request.dto';
 import { firstValueFrom } from 'rxjs';
 import { WeatherResponse } from './dto/weather-response.dto';
 import { CacheService } from '../cache/cache.service';
 import { DatabaseService } from '../database/database.service';
 import { WeatherData } from 'src/common/interfaces/weather.interface';
 import { OpenWeatherConfig } from '../config/openweather.config';
-import { UserWeatherQueryDto, UserWeatherResponseDto } from './dto/user-weather-response.dto';
+import { UserWeatherQuery, UserWeatherResponse } from './dto/user-weather-response.dto';
 
 @Injectable()
 export class WeatherService {
@@ -29,7 +29,7 @@ export class WeatherService {
     }
 
 
-    async getWeatherData(weatherDto: WeatherDto, userId: number): Promise<WeatherResponse> {
+    async getWeatherData(weatherDto: WeatherRequest, userId: number): Promise<WeatherResponse> {
         try {
             // Step 1: Check cache first
             const cachedWeather = await this.cacheService.getWeatherCache(weatherDto.city, weatherDto.country);
@@ -67,7 +67,7 @@ export class WeatherService {
         }
     }
 
-    private async getCoordinates(weatherDto: WeatherDto): Promise<GeocodingResponse> {
+    private async getCoordinates(weatherDto: WeatherRequest): Promise<GeocodingResponse> {
         try {
             // Build query string for geocoding
             let query = weatherDto.city + ',' + weatherDto.country;
@@ -89,9 +89,44 @@ export class WeatherService {
             if (error instanceof HttpException) {
                 throw error;
             }
+
+            // Handle different HTTP status codes from external API
+            if (error.response) {
+                const status = error.response.status;
+                switch (status) {
+                    case 401:
+                        throw new HttpException(
+                            'Invalid API key for geocoding service',
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                        );
+                    case 404:
+                        throw new HttpException(
+                            'Location not found',
+                            HttpStatus.NOT_FOUND,
+                        );
+                    case 429:
+                        throw new HttpException(
+                            'Geocoding service rate limit exceeded',
+                            HttpStatus.TOO_MANY_REQUESTS,
+                        );
+                    case 500:
+                    case 502:
+                    case 503:
+                        throw new HttpException(
+                            'Geocoding service temporarily unavailable',
+                            HttpStatus.SERVICE_UNAVAILABLE,
+                        );
+                    default:
+                        throw new HttpException(
+                            'Failed to get location coordinates',
+                            HttpStatus.BAD_REQUEST,
+                        );
+                }
+            }
+
             throw new HttpException(
                 'Failed to get location coordinates',
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
     }
@@ -120,9 +155,43 @@ export class WeatherService {
 
             return weatherResponse;
         } catch (error) {
+            // Handle different HTTP status codes from external API
+            if (error.response) {
+                const status = error.response.status;
+                switch (status) {
+                    case 401:
+                        throw new HttpException(
+                            'Invalid API key for weather service',
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                        );
+                    case 404:
+                        throw new HttpException(
+                            'Weather data not found for coordinates',
+                            HttpStatus.NOT_FOUND,
+                        );
+                    case 429:
+                        throw new HttpException(
+                            'Weather service rate limit exceeded',
+                            HttpStatus.TOO_MANY_REQUESTS,
+                        );
+                    case 500:
+                    case 502:
+                    case 503:
+                        throw new HttpException(
+                            'Weather service temporarily unavailable',
+                            HttpStatus.SERVICE_UNAVAILABLE,
+                        );
+                    default:
+                        throw new HttpException(
+                            'Failed to fetch weather data',
+                            HttpStatus.BAD_REQUEST,
+                        );
+                }
+            }
+
             throw new HttpException(
                 'Failed to fetch weather data',
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
     }
@@ -146,7 +215,7 @@ export class WeatherService {
     /**
      * Save weather query and data to database
      */
-    private async saveWeatherQuery(userId: number, weatherDto: WeatherDto, weatherData: WeatherResponse | WeatherData): Promise<void> {
+    private async saveWeatherQuery(userId: number, weatherDto: WeatherRequest, weatherData: WeatherResponse | WeatherData): Promise<void> {
         try {
             // Create weather query record
             const weatherQuery = await this.databaseService.weatherQuery.create({
@@ -195,22 +264,35 @@ export class WeatherService {
     /**
      * Get user's weather query history
      */
-    async getUserWeatherQueries(userId: number): Promise<UserWeatherResponseDto> {
+    async getUserWeatherQueries(userId: number): Promise<UserWeatherResponse> {
         try {
-            // Get from database (skipping cache for now due to type mismatch)
-            const queries = await this.databaseService.weatherQuery.findMany({
-                where: { userId },
+            // Get user with their weather queries in a single query
+            const userWithQueries = await this.databaseService.user.findUnique({
+                where: { id: userId },
                 include: {
-                    WeatherData: true,
-                },
-                orderBy: {
-                    queryTime: 'desc'
-                },
-                take: 50 // Limit to last 50 queries
+                    weatherQueries: {
+                        include: {
+                            WeatherData: true,
+                        },
+                        orderBy: {
+                            queryTime: 'desc'
+                        },
+                        take: 50 // Limit to last 50 queries
+                    }
+                }
             });
 
+            if (!userWithQueries) {
+                throw new HttpException(
+                    'User not found',
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            const queries = userWithQueries.weatherQueries;
+
             // Transform data for response
-            const transformedQueries: UserWeatherQueryDto[] = queries.map(query => ({
+            const transformedQueries: UserWeatherQuery[] = queries.map(query => ({
                 id: userId,
                 queryId: query.id,
                 city: query.city,
@@ -233,6 +315,12 @@ export class WeatherService {
             };
         } catch (error) {
             this.logger.error(`Failed to get user weather queries for user ${userId}:`, error);
+
+            // If it's already an HttpException, re-throw it
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
             throw new HttpException(
                 'Failed to retrieve weather query history',
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -280,6 +368,12 @@ export class WeatherService {
             }));
         } catch (error) {
             this.logger.error('Failed to get all weather queries:', error);
+
+            // If it's already an HttpException, re-throw it
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
             throw new HttpException(
                 'Failed to retrieve all weather queries',
                 HttpStatus.INTERNAL_SERVER_ERROR,

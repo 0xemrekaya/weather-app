@@ -1,10 +1,11 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { CreateUserDto } from "../dto/create-user.dto";
-import { UserResponseData } from "src/common/dto/user-response.dto";
-import { RegisterResponse } from "../dto/create-user-response.dto";
+import { CreateUserRequest } from "../dto/create-user-request.dto";
+import { CreateUserResponse } from "../dto/create-user-response.dto";
+import { ErrorResponse, ValidationErrorResponse } from "../../../common/dto/error-response.dto";
+import { GetAllUserResponse } from "../dto/get-all-user-response.dto";
 
-export function ApiRegisterSwagger() {
+export function ApiCreateUserSwagger() {
     return applyDecorators(
         ApiOperation({
             summary: 'User registration',
@@ -12,21 +13,38 @@ export function ApiRegisterSwagger() {
         }),
         ApiBearerAuth(),
         ApiBody({
-            type: CreateUserDto,
+            type: CreateUserRequest,
             description: 'User registration data'
         }),
         ApiResponse({
             status: 201,
             description: 'User registered successfully',
-            type: RegisterResponse
-        }),
-        ApiResponse({
-            status: 409,
-            description: 'User already exists'
+            type: CreateUserResponse
         }),
         ApiResponse({
             status: 400,
-            description: 'Validation error'
+            description: 'Validation error - Invalid input format',
+            type: ValidationErrorResponse
+        }),
+        ApiResponse({
+            status: 401,
+            description: 'Unauthorized - Invalid or missing token',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 403,
+            description: 'Forbidden - Admin access required',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 409,
+            description: 'Conflict - User already exists',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 500,
+            description: 'Internal server error',
+            type: ErrorResponse
         })
     );
 }
@@ -34,12 +52,26 @@ export function ApiRegisterSwagger() {
 export function ApiGetUserAllSwagger() {
     return applyDecorators(
         ApiOperation({ summary: 'Get all users (Admin only)' }),
+        ApiBearerAuth(),
         ApiResponse({
             status: 200,
             description: 'List of all users',
-            type: [UserResponseData]
+            type: [GetAllUserResponse]
         }),
-        ApiResponse({ status: 401, description: 'Unauthorized' }),
-        ApiResponse({ status: 403, description: 'Forbidden - Admin access required' }),
+        ApiResponse({
+            status: 401,
+            description: 'Unauthorized - Invalid or missing token',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 403,
+            description: 'Forbidden - Admin access required',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 500,
+            description: 'Internal server error',
+            type: ErrorResponse
+        })
     )
 }

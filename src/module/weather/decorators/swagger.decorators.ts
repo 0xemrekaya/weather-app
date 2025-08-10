@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, } from '@nestjs/swagger';
 import { WeatherResponse } from '../dto/weather-response.dto';
-import { UserWeatherResponseDto } from '../dto/user-weather-response.dto';
+import { UserWeatherResponse } from '../dto/user-weather-response.dto';
+import { ErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
 
 
 export function ApiWeatherSwagger() {
@@ -13,23 +14,67 @@ export function ApiWeatherSwagger() {
             description: 'Weather data retrieved successfully',
             type: WeatherResponse,
         }),
-        ApiResponse({ status: 404, description: 'Location not found' }),
-        ApiResponse({ status: 401, description: 'Unauthorized' }),
-        ApiResponse({ status: 500, description: 'Internal server error from Weather API' }),
+        ApiResponse({
+            status: 400,
+            description: 'Bad request - Invalid parameters',
+            type: ValidationErrorResponse,
+        }),
+        ApiResponse({
+            status: 401,
+            description: 'Unauthorized - Invalid or missing token',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 404,
+            description: 'Location not found',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 429,
+            description: 'Too many requests - Rate limit exceeded',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 500,
+            description: 'Internal server error - API key or service issues',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 503,
+            description: 'Service unavailable - External API temporarily down',
+            type: ErrorResponse,
+        }),
     );
 }
 
 export function ApiGetUserselfWeatherHistorySwagger() {
     return applyDecorators(
-        ApiOperation({ summary: 'Get user weather query history' }),
+        ApiOperation({ summary: 'Get user weather query history (Admin only)' }),
         ApiBearerAuth(),
         ApiResponse({
             status: 200,
             description: 'User weather query history retrieved successfully',
-            type: UserWeatherResponseDto,
+            type: UserWeatherResponse,
         }),
-        ApiResponse({ status: 404, description: 'User not found' }),
-        ApiResponse({ status: 401, description: 'Unauthorized' }),
-        ApiResponse({ status: 500, description: 'Internal server error' }),
+        ApiResponse({
+            status: 401,
+            description: 'Unauthorized - Invalid or missing token',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 403,
+            description: 'Forbidden - Admin access required',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 404,
+            description: 'User not found',
+            type: ErrorResponse,
+        }),
+        ApiResponse({
+            status: 500,
+            description: 'Internal server error - Database or system error',
+            type: ErrorResponse,
+        }),
     );
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class WeatherDataDto {
+export class WeatherData {
     @ApiProperty({ description: 'Main weather condition', example: 'Clear' })
     main: string;
 
@@ -26,7 +26,7 @@ export class WeatherDataDto {
     tempMin: number;
 }
 
-export class UserWeatherQueryDto {
+export class UserWeatherQuery {
     @ApiProperty({ description: 'User ID', example: 1 })
     id: number;
 
@@ -41,18 +41,18 @@ export class UserWeatherQueryDto {
 
     @ApiProperty({ 
         description: 'Weather data', 
-        type: WeatherDataDto,
+        type: WeatherData,
         nullable: true 
     })
-    weatherData: WeatherDataDto | null;
+    weatherData: WeatherData | null;
 }
 
-export class UserWeatherResponseDto {
+export class UserWeatherResponse {
     @ApiProperty({ 
         description: 'List of user weather queries',
-        type: [UserWeatherQueryDto]
+        type: [UserWeatherQuery]
     })
-    queries: UserWeatherQueryDto[];
+    queries: UserWeatherQuery[];
 
     @ApiProperty({ description: 'Total number of queries', example: 15 })
     total: number;

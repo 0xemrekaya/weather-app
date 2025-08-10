@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { LoginDto } from './dto/login.dto';
+import { LoginRequest } from './dto/login-request.dto';
 import { AuthService } from './auth.service';
 import { ApiLoginSwagger } from './decorators/swagger.decorator';
 import { LoginResponse } from './dto/login-response.dto';
@@ -13,7 +13,7 @@ export class AuthController {
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiLoginSwagger()
-    async login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
+    async login(@Body() loginDto: LoginRequest): Promise<LoginResponse> {
         return this.authService.login(loginDto);
     }
 }

@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import { LoginDto } from '../dto/login.dto';
+import { LoginRequest } from '../dto/login-request.dto';
 import { LoginResponse } from '../dto/login-response.dto';
+import { ErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
 
 export function ApiLoginSwagger() {
     return applyDecorators(
@@ -10,7 +11,7 @@ export function ApiLoginSwagger() {
             description: 'Authenticate user with username and password. Returns JWT token with User object.'
         }),
         ApiBody({
-            type: LoginDto,
+            type: LoginRequest,
             description: 'User login credentials'
         }),
         ApiResponse({
@@ -19,16 +20,24 @@ export function ApiLoginSwagger() {
             type: LoginResponse
         }),
         ApiResponse({
-            status: 404,
-            description: 'User not found'
+            status: 400,
+            description: 'Validation error - Invalid input format',
+            type: ValidationErrorResponse
         }),
         ApiResponse({
             status: 401,
-            description: 'Invalid credentials'
+            description: 'Invalid credentials - Wrong username or password',
+            type: ErrorResponse
         }),
         ApiResponse({
-            status: 400,
-            description: 'Validation error'
+            status: 404,
+            description: 'User not found',
+            type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 500,
+            description: 'Internal server error',
+            type: ErrorResponse
         })
     );
 }

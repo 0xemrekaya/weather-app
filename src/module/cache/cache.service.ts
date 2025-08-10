@@ -60,7 +60,7 @@ export class CacheService implements OnModuleInit {
     async setWeatherCache(city: string, country: string, data: WeatherData, customTtl?: number): Promise<void> {
         try {
             const cacheKey = this.generateWeatherCacheKey(city, country);
-            const ttl = customTtl || 300; // 5 minutes default (in seconds)
+            const ttl = customTtl || 300 * 1000; // 5 minutes default (in seconds)
 
             this.logger.debug(`Cache SET attempt - Key: ${cacheKey} for ${city}, ${country}`);
 
@@ -98,7 +98,7 @@ export class CacheService implements OnModuleInit {
     async setUserQueriesCache(userId: number, queries: WeatherData[], ttl?: number): Promise<void> {
         try {
             const cacheKey = this.generateUserQueriesCacheKey(userId);
-            const cacheTTL = ttl || 120; // 2 minutes for user data
+            const cacheTTL = ttl || 120 * 1000; // 2 minutes for user data
 
             // Convert seconds to milliseconds for cache-manager-redis-yet
             await this.cacheManager.set(cacheKey, queries, cacheTTL);

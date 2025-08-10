@@ -6,6 +6,8 @@ import { CreateUserInput, UserSelectFields } from './interfaces/user.interface';
 import { UserResponseData } from 'src/common/dto/user-response.dto';
 import { DatabaseService } from '../database/database.service';
 import { JwtConfig } from '../config/jwt.config';
+import { CreateUserResponse } from './dto/create-user-response.dto';
+import { GetAllUserResponse } from './dto/get-all-user-response.dto';
 
 @Injectable()
 export class UserService {
@@ -16,6 +18,7 @@ export class UserService {
         private readonly jwtConfig: JwtConfig
     ) {
         this.saltRounds = this.jwtConfig.saltRounds;
+        console.log('Salt rounds initialized:', this.saltRounds, typeof this.saltRounds);
     }
 
     /**
@@ -80,7 +83,7 @@ export class UserService {
     /**
      * Create a new user with hashed password
      */
-    async createUser(userData: CreateUserInput): Promise<UserResponseData> {
+    async createUser(userData: CreateUserInput): Promise<CreateUserResponse> {
         const { email, username, password, role } = userData;
 
         // Check if user already exists
@@ -111,12 +114,14 @@ export class UserService {
         });
 
         return {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role as UserRoles,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role as UserRoles,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+            }
         };
     }
 
@@ -133,7 +138,7 @@ export class UserService {
     /**
      * Get all users (admin only)
      */
-    async getAllUsers(): Promise<UserResponseData[]> {
+    async getAllUsers(): Promise<GetAllUserResponse[]> {
         const users = await this.databaseService.user.findMany({
             select: {
                 id: true,
@@ -149,12 +154,14 @@ export class UserService {
         });
 
         return users.map(user => ({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role as UserRoles,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role as UserRoles,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+            }
         }));
     }
 }
