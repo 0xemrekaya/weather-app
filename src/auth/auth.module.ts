@@ -4,10 +4,9 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { Roles } from './decorators/roles.decorator';
 import { RolesGuard } from './guard/roles.guard';
 import { JwtGuard } from './guard/jwt.guard';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
     imports: [
@@ -16,7 +15,7 @@ import { JwtGuard } from './guard/jwt.guard';
             secret: process.env.JWT_SECRET || 'your-secret-key',
             signOptions: { expiresIn: '7d' },
         }),
-        PrismaModule,
+        UserModule,
     ],
     controllers: [AuthController],
     providers: [
@@ -26,6 +25,7 @@ import { JwtGuard } from './guard/jwt.guard';
         RolesGuard,
     ],
     exports: [
+        AuthService,
         JwtGuard,
         RolesGuard,
     ],

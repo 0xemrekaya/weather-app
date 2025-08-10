@@ -2,8 +2,9 @@ import { PassportStrategy } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Injectable } from "@nestjs/common";
-import { UserRoles } from "./enums/role.enum";
+
 import { JwtPayload } from "./interfaces/auth.interface";
+import { UserRoles } from "src/common/enums/user.enum";
 
 // User interface for validated user
 interface ValidatedUser {

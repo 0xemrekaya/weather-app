@@ -1,8 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginDto } from '../dto/login.dto';
-import { RegisterDto } from '../dto/register.dto';
-import { LoginResponse, RegisterResponse } from '../interfaces/auth.interface';
+import { LoginResponse } from '../interfaces/auth.interface';
 
 export function ApiLoginSwagger() {
     return applyDecorators(
@@ -26,33 +25,6 @@ export function ApiLoginSwagger() {
         ApiResponse({
             status: 401,
             description: 'Invalid credentials'
-        }),
-        ApiResponse({
-            status: 400,
-            description: 'Validation error'
-        })
-    );
-}
-
-export function ApiRegisterSwagger() {
-    return applyDecorators(
-        ApiOperation({
-            summary: 'User registration',
-            description: 'Register a new user with username, email, password and role. Returns JWT token with User object.'
-        }),
-        ApiBearerAuth(),
-        ApiBody({
-            type: RegisterDto,
-            description: 'User registration data'
-        }),
-        ApiResponse({
-            status: 201,
-            description: 'User registered successfully',
-            type: RegisterResponse
-        }),
-        ApiResponse({
-            status: 409,
-            description: 'User already exists'
         }),
         ApiResponse({
             status: 400,
