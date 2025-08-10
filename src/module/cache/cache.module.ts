@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { CacheService } from './cache.service';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from 'src/module/config/config.module';
-import { redisStore } from 'cache-manager-redis-store';
+import { redisStore } from 'cache-manager-redis-yet';
 import { CacheConfig } from 'src/module/config/cache.config';
 
 @Module({
@@ -17,13 +17,11 @@ import { CacheConfig } from 'src/module/config/cache.config';
                     },
                     password: cacheConfig.password,
                     database: cacheConfig.database,
-                    retryDelayOnFailover: cacheConfig.cacheConfig.retryDelayOnFailover,
-                    maxRetriesPerRequest: cacheConfig.cacheConfig.maxRetriesPerRequest,
                 });
 
                 return {
-                    store: () => store,
-                    ttl: cacheConfig.ttl,
+                    store: store,
+                    ttl: cacheConfig.ttl * 1000, // cache-manager-redis-yet expects milliseconds
                     max: cacheConfig.maxItems,
                 };
             },

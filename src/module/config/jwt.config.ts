@@ -20,6 +20,10 @@ export class JwtConfig {
         return this.configService.get<string>('JWT_EXPIRES_IN', '24h');
     }
 
+    get saltRounds(): number {
+        return this.configService.get<number>('JWT_SALT_ROUNDS', 12);
+    }
+
     get jwtConfig() {
         return {
             secret: this.secret,

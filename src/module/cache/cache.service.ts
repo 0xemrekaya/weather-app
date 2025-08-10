@@ -27,21 +27,24 @@ export class CacheService implements OnModuleInit {
             }
         } catch (error) {
             this.logger.error('Redis cache connection failed:', error.message);
-            this.logger.warn('Cache service operating in fallback mode');
         }
     }
 
     /**
      * Get cached weather data with proper error handling
      */
-    async getWeatherCache(city: string): Promise<WeatherData | null> {
+    async getWeatherCache(city: string, country: string): Promise<WeatherData | null> {
         try {
-            const cacheKey = this.generateWeatherCacheKey(city);
+            const cacheKey = this.generateWeatherCacheKey(city, country);
+            this.logger.debug(`Cache GET attempt - Key: ${cacheKey} for ${city}, ${country}`);
+            
             const cachedData = await this.cacheManager.get<WeatherData>(cacheKey);
 
             if (cachedData) {
-                this.logger.debug(`Cache HIT for weather data: ${city}`);
+                this.logger.debug(`Cache HIT for weather data: ${city}, ${country}`);
                 return cachedData;
+            } else {
+                this.logger.debug(`Cache MISS for weather data: ${city}, ${country} - Key: ${cacheKey}`);
             }
 
             return null;
@@ -54,16 +57,18 @@ export class CacheService implements OnModuleInit {
     /**
      * Set weather data cache with TTL optimization
      */
-    async setWeatherCache(city: string, data: WeatherData, customTtl?: number): Promise<void> {
+    async setWeatherCache(city: string, country: string, data: WeatherData, customTtl?: number): Promise<void> {
         try {
-            const cacheKey = this.generateWeatherCacheKey(city);
-            const ttl = customTtl || 300; // 5 minutes default
+            const cacheKey = this.generateWeatherCacheKey(city, country);
+            const ttl = customTtl || 300; // 5 minutes default (in seconds)
 
+            this.logger.debug(`Cache SET attempt - Key: ${cacheKey} for ${city}, ${country}`);
+
+            // Convert seconds to milliseconds for cache-manager-redis-yet
             await this.cacheManager.set(cacheKey, data, ttl);
-            this.logger.debug(`Cache SET for weather data: ${city} (TTL: ${ttl}s)`);
         } catch (error) {
             // Error handling
-            this.logger.error(`Cache SET error for ${city}:`, error.message);
+            this.logger.error(`Cache SET error for ${city}, ${country}:`, error.message);
         }
     }
 
@@ -95,6 +100,7 @@ export class CacheService implements OnModuleInit {
             const cacheKey = this.generateUserQueriesCacheKey(userId);
             const cacheTTL = ttl || 120; // 2 minutes for user data
 
+            // Convert seconds to milliseconds for cache-manager-redis-yet
             await this.cacheManager.set(cacheKey, queries, cacheTTL);
             this.logger.debug(`Cache SET for user queries: userId=${userId} (TTL: ${cacheTTL}s)`);
         } catch (error) {
@@ -131,8 +137,10 @@ export class CacheService implements OnModuleInit {
     /**
      * Generate consistent cache keys for weather data
      */
-    private generateWeatherCacheKey(city: string): string {
-        return `weather:${city.toLowerCase().trim().replace(/\s+/g, '_')}`;
+    private generateWeatherCacheKey(city: string, country: string): string {
+        const key = `weather:${city.toLowerCase().trim().replace(/\s+/g, '_')}:${country.toLowerCase().trim().replace(/\s+/g, '_')}`;
+        this.logger.debug(`Generated cache key: ${key} from city: '${city}', country: '${country}'`);
+        return key;
     }
 
     /**

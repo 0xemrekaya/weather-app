@@ -5,12 +5,18 @@ import { UserRoles } from '../../common/enums/user.enum';
 import { CreateUserInput, UserSelectFields } from './interfaces/user.interface';
 import { UserResponseData } from 'src/common/dto/user-response.dto';
 import { DatabaseService } from '../database/database.service';
+import { JwtConfig } from '../config/jwt.config';
 
 @Injectable()
 export class UserService {
-    private readonly saltRounds = 12;
+    private readonly saltRounds: number;
 
-    constructor(private readonly databaseService: DatabaseService) { }
+    constructor(
+        private readonly databaseService: DatabaseService,
+        private readonly jwtConfig: JwtConfig
+    ) {
+        this.saltRounds = this.jwtConfig.saltRounds;
+    }
 
     /**
      * Find user by username for authentication

@@ -25,7 +25,7 @@ export class OpenWeatherConfig {
         return geocodingUrl;
     }
 
-    get baseUrl(): string {
+    get weatherUrl(): string {
         const weatherUrl = this.configService.get<string>('OPENWEATHER_WEATHER_URL');
         if (!weatherUrl) {
             throw new Error('OPENWEATHER_WEATHER_URL is required for weather data integration');
@@ -42,7 +42,7 @@ export class OpenWeatherConfig {
      */
     get httpConfig() {
         return {
-            baseURL: this.baseUrl,
+            weatherUrl: this.weatherUrl,
             timeout: this.timeout,
             params: {
                 appid: this.apiKey,

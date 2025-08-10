@@ -3,9 +3,13 @@ import { WeatherService } from './weather.service';
 import { WeatherController } from './weather.controller';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from '../auth/auth.module';
+import { CacheModule } from '../cache/cache.module';
+import { DatabaseModule } from '../database/database.module';
+import { ConfigModule } from '../config/config.module';
+
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [HttpModule, CacheModule, DatabaseModule, ConfigModule],
   providers: [WeatherService],
   controllers: [WeatherController],
 })

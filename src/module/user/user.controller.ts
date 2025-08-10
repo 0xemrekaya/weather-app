@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { JwtGuard } from '../auth/guard/jwt.guard';
-import { RolesGuard } from '../auth/guard/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtGuard } from '../../common/guards/jwt.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRoles } from 'src/common/enums/user.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiGetUserAllSwagger, ApiRegisterSwagger } from './decorators/swagger.decorator';
 import { UserResponseData } from 'src/common/dto/user-response.dto';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiTags('Users')
 @Controller('users')
