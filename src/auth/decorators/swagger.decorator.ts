@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginResponse, RegisterResponse } from '../interfaces/auth.interface';
@@ -8,7 +8,7 @@ export function ApiLoginSwagger() {
     return applyDecorators(
         ApiOperation({
             summary: 'User login',
-            description: 'Authenticate user with username and password. Returns JWT token for accessing protected endpoints.'
+            description: 'Authenticate user with username and password. Returns JWT token with User object.'
         }),
         ApiBody({
             type: LoginDto,
@@ -40,6 +40,7 @@ export function ApiRegisterSwagger() {
             summary: 'User registration',
             description: 'Register a new user with username, email, password and role. Returns JWT token with User object.'
         }),
+        ApiBearerAuth(),
         ApiBody({
             type: RegisterDto,
             description: 'User registration data'
