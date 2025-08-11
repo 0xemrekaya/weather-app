@@ -14,8 +14,10 @@ This project is a RESTful API service developed with NestJS that allows users to
 - **Validation:** Automatic validation of incoming requests via DTOs using `class-validator` and `class-transformer`.
 - **API Documentation:** Auto-generated and interactive API documentation with Swagger (OpenAPI).
 - **Security:** Protection against brute-force attacks with Throttling (rate limiting).
+- **Logging:** Comprehensive logging for incoming requests, responses, and errors.
 - **Monitoring and Metrics:** Collection of metrics with Prometheus and visualization with Grafana.
 - **Containerization:** Easy setup and deployment with Docker and Docker Compose.
+
 
 ## System Architecture
 
@@ -63,6 +65,8 @@ graph TD
     Prometheus -- "Scrapes" --> Metrics
     Grafana -- "Visualizes" --> Prometheus
 ```
+### Database Schema
+<img width="2201" height="917" alt="image" src="https://github.com/user-attachments/assets/47e9009a-86f7-4c7d-901d-f58157df99b5" />
 
 ## Project Folder Structure
 
@@ -156,9 +160,10 @@ The system has two different user roles:
   - Can create new users.
   - Can query the weather history of any user by `userId`.
 
-## API Endpoints
+## API Endpoints (Swagger)
 
 Once the application is started, you can access the API documentation at `http://localhost:3000/api/docs`.
+All endpoints start with `/api/v1` prefix.
 
 ### Auth
 
@@ -201,7 +206,20 @@ npm run test:e2e
 npm run test:cov
 ```
 
+## Logging and Error Handling
+
+The application implements a comprehensive logging and error handling strategy to ensure robustness and facilitate debugging.
+
+- **`LoggingInterceptor`**: This interceptor logs every incoming request and outgoing response. It captures the request method, URL, IP address, user agent, and the processing time. This provides a clear audit trail of all traffic.
+
+- **`GlobalExceptionFilter`**: This global filter catches all unhandled exceptions throughout the application. It normalizes errors into a consistent JSON response format and logs them with appropriate severity levels:
+  - **HTTP Exceptions**: Handled gracefully, returning standard HTTP status codes.
+  - **Prisma Errors**: Specific database errors (e.g., unique constraint violations, records not found) are caught and mapped to user-friendly error responses.
+  - **5xx Errors**: Logged as `ERROR` for critical issues.
+  - **4xx Errors**: Logged as `WARN` for client-side issues.
+
 ## Monitoring
+<img width="2095" height="1109" alt="image" src="https://github.com/user-attachments/assets/bf0606e7-be4c-467d-8b66-23090221b36c" />
 
 The project has monitoring capabilities with Prometheus and Grafana.
 
