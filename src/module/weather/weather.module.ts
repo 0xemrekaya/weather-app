@@ -5,7 +5,6 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from '../auth/auth.module';
 import { CacheModule } from '../cache/cache.module';
 import { DatabaseModule } from '../database/database.module';
-import { ConfigModule } from '../config/config.module';
 
 
 @Module({
@@ -15,8 +14,7 @@ import { ConfigModule } from '../config/config.module';
       maxRedirects: 3, // Maximum number of redirects
     }),
     CacheModule, 
-    DatabaseModule, 
-    ConfigModule
+    DatabaseModule,
   ],
   providers: [WeatherService],
   controllers: [WeatherController],

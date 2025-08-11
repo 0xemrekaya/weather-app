@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { validate } from './dto/env.dto';
@@ -7,7 +7,7 @@ import { JwtConfig } from './jwt.config';
 import { CacheConfig } from './cache.config';
 import { OpenWeatherConfig } from './openweather.config';
 
-
+@Global()
 @Module({
     imports: [
         // Custom configuration module

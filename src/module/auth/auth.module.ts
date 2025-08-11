@@ -7,7 +7,6 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtGuard } from '../../common/guards/jwt.guard';
 import { UserModule } from '../user/user.module';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { ConfigModule } from '../config/config.module';
 import { JwtConfig } from '../config/jwt.config';
 
 // Auth module for handling authentication-related functionality
@@ -15,7 +14,7 @@ import { JwtConfig } from '../config/jwt.config';
     imports: [
         PassportModule, // For handling authentication strategies
         JwtModule.registerAsync({
-            imports: [ConfigModule],
+            imports: [],
             useFactory: async (jwtConfig: JwtConfig) => ({
                 secret: jwtConfig.secret,
                 signOptions: { expiresIn: jwtConfig.expiresIn },
@@ -23,7 +22,6 @@ import { JwtConfig } from '../config/jwt.config';
             inject: [JwtConfig],
         }),
         UserModule,
-        ConfigModule, // Import ConfigModule to access JwtConfig
     ],
     controllers: [AuthController],
     providers: [
