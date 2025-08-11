@@ -72,6 +72,21 @@ graph TD
 ### Database Schema
 <img width="2201" height="917" alt="image" src="https://github.com/user-attachments/assets/47e9009a-86f7-4c7d-901d-f58157df99b5" />
 
+The database schema includes several indexes to optimize query performance. Below is a list of these indexes and their purposes:
+
+- **User Model:**
+  - `email` and `username` have unique constraints, which also create indexes to prevent duplicates and speed up lookups.
+
+- **WeatherQuery Model:**
+  - `userId`: Indexed to quickly retrieve all queries for a specific user.
+  - `userId, queryTime` (Composite Index): Optimizes queries that filter by both user and the time of the query.
+  - `city, queryTime` (Composite Index): Optimizes queries that filter by both city and the time of the query.
+
+- **WeatherData Model:**
+  - `weatherQueryId`: Indexed with a unique constraint to ensure a fast, direct link to its corresponding `WeatherQuery`.
+
+These indexes are crucial for maintaining performance, especially as the amount of data grows.
+
 ## Project Folder Structure
 
 The project follows the standard modular structure of NestJS. The main logic is located under the `src/` directory.
