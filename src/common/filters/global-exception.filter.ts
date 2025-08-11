@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import { Request, Response } from 'express';
 import { Prisma } from "generated/prisma";
+import { errorsTotal } from "src/module/metrics/metrics.controller";
 
 // Global Exception Filter
 // Handles all exceptions thrown in the application
@@ -17,6 +18,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         let status = HttpStatus.INTERNAL_SERVER_ERROR;
         let message = 'Internal server error';
         let error = 'Internal Server Error';
+
+        // Increment error counter for all errors
+        errorsTotal.inc();
 
         // Handle HTTP exceptions
         if (exception instanceof HttpException) {

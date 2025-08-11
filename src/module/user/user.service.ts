@@ -8,6 +8,7 @@ import { DatabaseService } from '../database/database.service';
 import { JwtConfig } from '../config/jwt.config';
 import { CreateUserResponse } from './dto/create-user-response.dto';
 import { GetAllUserResponse } from './dto/get-all-user-response.dto';
+import { usersCreatedTotal } from '../metrics/metrics.controller';
 
 @Injectable()
 export class UserService {
@@ -120,6 +121,9 @@ export class UserService {
         });
 
         this.logger.log(`User created successfully: ${username} (ID: ${user.id}, Role: ${user.role})`);
+        
+        // Increment users created counter
+        usersCreatedTotal.inc();
 
         return {
             user: {
