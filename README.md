@@ -16,6 +16,9 @@ This project is a RESTful API service developed with NestJS that allows users to
 - **Security:** Protection against brute-force attacks with Throttling (rate limiting).
 - **Logging:** Comprehensive logging for incoming requests, responses, and errors.
 - **Monitoring and Metrics:** Collection of metrics with Prometheus and visualization with Grafana.
+- **CORS:** Configurable Cross-Origin Resource Sharing.
+- **Graceful Shutdown:** Ensures the application terminates cleanly, preventing data loss.
+- **Health Check:** An endpoint to monitor application status.
 - **Containerization:** Easy setup and deployment with Docker and Docker Compose.
 
 
@@ -163,34 +166,39 @@ The system has two different user roles:
 ## API Endpoints (Swagger)
 
 Once the application is started, you can access the API documentation at `http://localhost:3000/api/docs`.
-All endpoints start with `/api/v1` prefix.
 
 ### Auth
 
-| Method | Endpoint      | Description                  | Role   |
-| ------ | ------------- | ---------------------------- | ------ |
-| `POST` | `/auth/login` | User login and get JWT token | Public |
+| Method | Endpoint            | Description                  | Role   |
+| ------ | ------------------- | ---------------------------- | ------ |
+| `POST` | `/api/v1/auth/login`| User login and get JWT token | Public |
 
 ### Users
 
-| Method | Endpoint | Description         | Role    |
-| ------ | -------- | ------------------- | ------- |
-| `GET`  | `/users` | Lists all users     | `admin` |
-| `POST` | `/users` | Creates a new user  | `admin` |
+| Method | Endpoint       | Description         | Role    |
+| ------ | -------------- | ------------------- | ------- |
+| `GET`  | `/api/v1/users`  | Lists all users     | `admin` |
+| `POST` | `/api/v1/users`  | Creates a new user  | `admin` |
 
 ### Weather
 
-| Method | Endpoint                    | Description                                  | Role           |
-| ------ | --------------------------- | -------------------------------------------- | -------------- |
-| `GET`  | `/weather`                  | Gets weather data for a specified city       | `user`, `admin` |
-| `GET`  | `/weather/history`          | Gets the query history of the logged-in user | `user`, `admin` |
-| `GET`  | `/weather/history/user/:id` | Gets the query history of a specific user    | `admin`        |
+| Method | Endpoint                          | Description                                  | Role           |
+| ------ | --------------------------------- | -------------------------------------------- | -------------- |
+| `GET`  | `/api/v1/weather`                 | Gets weather data for a specified city       | `user`, `admin` |
+| `GET`  | `/api/v1/weather/history`         | Gets the query history of the logged-in user | `user`, `admin` |
+| `GET`  | `/api/v1/weather/history/user/:id`| Gets the query history of a specific user    | `admin`        |
 
 ### Metrics
 
-| Method | Endpoint    | Description                     | Role   |
-| ------ | ----------- | ------------------------------- | ------ |
-| `GET`  | `/metrics`  | Serves Prometheus metrics       | Public |
+| Method | Endpoint          | Description                     | Role   |
+| ------ | ----------------- | ------------------------------- | ------ |
+| `GET`  | `/api/v1/metrics` | Serves Prometheus metrics       | Public |
+
+### Health Check
+
+| Method | Endpoint          | Description                        | Role   |
+| ------ | ----------------- | ---------------------------------- | ------ |
+| `GET`  | `/api/v1/health`  | Checks the health of the application | Public |
 
 
 ## Running Tests
