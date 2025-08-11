@@ -1,6 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString, Matches, MinLength, MaxLength } from "class-validator";
 
+// Weather request DTO
+// Represents the data required to request weather information
+// e.g., city name, country code: izmir, tr
 export class WeatherRequest {
     @ApiProperty({
         example: 'Izmir',

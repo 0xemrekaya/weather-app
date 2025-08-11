@@ -9,7 +9,15 @@ import { ConfigModule } from '../config/config.module';
 
 
 @Module({
-  imports: [HttpModule, CacheModule, DatabaseModule, ConfigModule],
+  imports: [
+    HttpModule.register({
+      timeout: 10000, // 10 seconds timeout
+      maxRedirects: 3, // Maximum number of redirects
+    }),
+    CacheModule, 
+    DatabaseModule, 
+    ConfigModule
+  ],
   providers: [WeatherService],
   controllers: [WeatherController],
 })

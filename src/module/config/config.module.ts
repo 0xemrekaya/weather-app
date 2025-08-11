@@ -10,7 +10,7 @@ import { OpenWeatherConfig } from './openweather.config';
 
 @Module({
     imports: [
-        // Case study requirement: System Design & Scalability
+        // Custom configuration module
         NestConfigModule.forRoot({
             isGlobal: true,
             envFilePath: ['.env'],

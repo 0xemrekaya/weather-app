@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import type { UserRole } from '../../../generated/prisma';
 import { UserRoles } from '../enums/user.enum';
 
-// Database user entity interface (from Prisma)
+// Database user entity interface (from Prisma) with optional password
 export interface UserEntity {
     id: number;
     username: string;

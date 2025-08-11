@@ -62,7 +62,7 @@ class EnvironmentVariables {
 
     @IsNumber()
     @IsOptional()
-    CACHE_TTL?: number = 300; // 5 minutes
+    CACHE_TTL?: number = 300; // Cache Time-To-Live in milliseconds
 
     @IsNumber()
     @IsOptional()

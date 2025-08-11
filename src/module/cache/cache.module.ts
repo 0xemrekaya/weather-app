@@ -1,28 +1,34 @@
 import { Module } from '@nestjs/common';
 import { CacheService } from './cache.service';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { ConfigModule } from 'src/module/config/config.module';
+import { ConfigModule } from '../../module/config/config.module';
 import { redisStore } from 'cache-manager-redis-yet';
-import { CacheConfig } from 'src/module/config/cache.config';
+import { CacheConfig } from '../../module/config/cache.config';
 
 @Module({
     imports: [
         NestCacheModule.registerAsync({
-            imports: [ConfigModule],
+            imports: [ConfigModule], // Import the ConfigModule to access configuration
             useFactory: async (cacheConfig: CacheConfig) => {
-                const store = await redisStore({
+                const redisConfig: any = {
                     socket: {
                         host: cacheConfig.host,
                         port: cacheConfig.port,
                     },
-                    password: cacheConfig.password,
                     database: cacheConfig.database,
-                });
+                };
+
+                // Only add password if it's defined
+                if (cacheConfig.password) {
+                    redisConfig.password = cacheConfig.password;
+                }
+
+                const store = await redisStore(redisConfig);
 
                 return {
                     store: store,
                     ttl: cacheConfig.ttl * 1000, // cache-manager-redis-yet expects milliseconds
-                    max: cacheConfig.maxItems,
+                    max: cacheConfig.maxItems, // cache-manager-redis-yet expects max items
                 };
             },
             inject: [CacheConfig],

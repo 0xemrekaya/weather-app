@@ -4,6 +4,7 @@ import { LoginRequest } from '../dto/login-request.dto';
 import { LoginResponse } from '../dto/login-response.dto';
 import { ErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
 
+// Swagger decorator for user login 
 export function ApiLoginSwagger() {
     return applyDecorators(
         ApiOperation({

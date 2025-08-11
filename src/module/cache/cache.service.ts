@@ -1,7 +1,7 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
-import { WeatherData } from 'src/common/interfaces/weather.interface';
+import { WeatherData } from '../../common/interfaces/weather.interface';
 
 @Injectable()
 export class CacheService implements OnModuleInit {

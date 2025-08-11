@@ -2,6 +2,9 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { Request, Response } from 'express';
 import { Prisma } from "generated/prisma";
 
+// Global Exception Filter
+// Handles all exceptions thrown in the application
+// Logs the error and sends a consistent error response
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(GlobalExceptionFilter.name);

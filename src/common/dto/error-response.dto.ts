@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+// Global Error response
+/*
+* @example
+* {
+*   "statusCode": 404,
+*   "timestamp": "2025-08-10T12:00:00.000Z",
+*   "method": "GET",
+*   "error": "Not Found",
+*   "message": "User not found"
+* }
+*/
 export class ErrorResponse {
     @ApiProperty({
         description: 'HTTP status code',
@@ -32,6 +43,17 @@ export class ErrorResponse {
     message: string;
 }
 
+// Global Validation Error response
+/*
+* @example
+* {
+*   "statusCode": 400,
+*   "timestamp": "2025-08-10T12:00:00.000Z",
+*   "method": "POST",
+*   "error": "Bad Request",
+*   "message": ["city must be a string", "country must be a string"]
+* }
+*/
 export class ValidationErrorResponse {
     @ApiProperty({
         description: 'HTTP status code',

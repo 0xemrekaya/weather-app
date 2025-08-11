@@ -4,7 +4,8 @@ import { WeatherResponse } from '../dto/weather-response.dto';
 import { UserWeatherResponse } from '../dto/user-weather-response.dto';
 import { ErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
 
-
+// Swagger decorators for weather endpoints
+// Get weather data for a city
 export function ApiWeatherSwagger() {
     return applyDecorators(
         ApiOperation({ summary: 'Get weather data for a city' }),
@@ -47,7 +48,9 @@ export function ApiWeatherSwagger() {
     );
 }
 
-export function ApiGetUserselfWeatherHistorySwagger() {
+/// Swagger documentation for getting user weather query history (Admin only)
+// Get weather query history for a specific user
+export function ApiGetUserWeatherHistorySwagger() {
     return applyDecorators(
         ApiOperation({ summary: 'Get user weather query history (Admin only)' }),
         ApiBearerAuth(),

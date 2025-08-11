@@ -5,15 +5,22 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtGuard } from '../../common/guards/jwt.guard';
-import { UserModule } from 'src/module/user/user.module';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserModule } from '../user/user.module';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { ConfigModule } from '../config/config.module';
+import { JwtConfig } from '../config/jwt.config';
 
+// Auth module for handling authentication-related functionality
 @Module({
     imports: [
-        PassportModule,
-        JwtModule.register({
-            secret: process.env.JWT_SECRET || 'your-secret-key',
-            signOptions: { expiresIn: '7d' },
+        PassportModule, // For handling authentication strategies
+        JwtModule.registerAsync({
+            imports: [ConfigModule],
+            useFactory: async (jwtConfig: JwtConfig) => ({
+                secret: jwtConfig.secret,
+                signOptions: { expiresIn: jwtConfig.expiresIn },
+            }),
+            inject: [JwtConfig],
         }),
         UserModule,
     ],

@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { UserRoles } from "../enums/user.enum";
 
+// User response data structure
 export class UserResponseData {
     @ApiProperty({ 
         description: 'User unique identifier',

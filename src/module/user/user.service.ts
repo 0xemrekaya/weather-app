@@ -3,7 +3,7 @@ import { UserEntity } from '../../common/interfaces/user.interface';
 import * as bcrypt from 'bcrypt';
 import { UserRoles } from '../../common/enums/user.enum';
 import { CreateUserInput, UserSelectFields } from './interfaces/user.interface';
-import { UserResponseData } from 'src/common/dto/user-response.dto';
+import { UserResponseData } from '../../common/dto/user-response.dto';
 import { DatabaseService } from '../database/database.service';
 import { JwtConfig } from '../config/jwt.config';
 import { CreateUserResponse } from './dto/create-user-response.dto';
@@ -83,6 +83,8 @@ export class UserService {
 
     /**
      * Create a new user with hashed password
+     * @param userData - User data to create
+     * @returns Created user data
      */
     async createUser(userData: CreateUserInput): Promise<CreateUserResponse> {
         const { email, username, password, role } = userData;
@@ -143,6 +145,7 @@ export class UserService {
 
     /**
      * Get all users (admin only)
+     * @returns List of all users
      */
     async getAllUsers(): Promise<GetAllUserResponse[]> {
         const users = await this.databaseService.user.findMany({

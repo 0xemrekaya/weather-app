@@ -5,10 +5,11 @@ import { CreateUserResponse } from "../dto/create-user-response.dto";
 import { ErrorResponse, ValidationErrorResponse } from "../../../common/dto/error-response.dto";
 import { GetAllUserResponse } from "../dto/get-all-user-response.dto";
 
+// Swagger decorators for create-user endpoint
 export function ApiCreateUserSwagger() {
     return applyDecorators(
         ApiOperation({
-            summary: 'User registration',
+            summary: 'User registration (Admin only)',
             description: 'Register a new user with username, email, password and role. Returns User object.'
         }),
         ApiBearerAuth(),
@@ -49,6 +50,7 @@ export function ApiCreateUserSwagger() {
     );
 }
 
+// Swagger decorators for get-all-users endpoint
 export function ApiGetUserAllSwagger() {
     return applyDecorators(
         ApiOperation({ summary: 'Get all users (Admin only)' }),

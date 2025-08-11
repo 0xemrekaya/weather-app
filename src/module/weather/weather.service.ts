@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { WeatherResponse } from './dto/weather-response.dto';
 import { CacheService } from '../cache/cache.service';
 import { DatabaseService } from '../database/database.service';
-import { WeatherData } from 'src/common/interfaces/weather.interface';
+import { WeatherData } from '../../common/interfaces/weather.interface';
 import { OpenWeatherConfig } from '../config/openweather.config';
 import { UserWeatherQuery, UserWeatherResponse } from './dto/user-weather-response.dto';
 
@@ -28,12 +28,16 @@ export class WeatherService {
         this.weatherUrl = this.weatherConfig.weatherUrl;
     }
 
-
+    /**
+    * Main method to get weather data
+    * @param weatherDto - DTO containing city and country
+    * @param userId - ID of the user making the request
+    */
     async getWeatherData(weatherDto: WeatherRequest, userId: number): Promise<WeatherResponse> {
         try {
             this.logger.log(`Fetching weather data for user ${userId}: ${weatherDto.city}, ${weatherDto.country}`);
-            
-            // Step 1: Check cache first
+
+            // Check cache first
             const cachedWeather = await this.cacheService.getWeatherCache(weatherDto.city, weatherDto.country);
             if (cachedWeather) {
                 // Save query to database even if data is cached
@@ -42,20 +46,20 @@ export class WeatherService {
             }
 
             this.logger.log(`Fetching fresh data from OpenWeather API for ${weatherDto.city}, ${weatherDto.country}`);
-            
-            // Step 2: Get coordinates from geocoding API
+
+            // Get coordinates from geocoding API
             const coordinates = await this.getCoordinates(weatherDto);
 
-            // Step 3: Get weather data using coordinates
+            // Get weather data using coordinates
             const weatherData = await this.getWeatherByCoordinates(
                 coordinates.lat,
                 coordinates.lon
             );
 
-            // Step 4: Cache the weather data
+            // Cache the weather data
             await this.cacheWeatherData(weatherDto.city, weatherDto.country, weatherData);
 
-            // Step 5: Save query and weather data to database
+            // Save query and weather data to database
             await this.saveWeatherQuery(userId, weatherDto, weatherData);
 
             this.logger.log(`Weather data successfully processed for ${weatherDto.city}, ${weatherDto.country}`);
@@ -73,7 +77,7 @@ export class WeatherService {
                 }
                 throw error;
             }
-            
+
             // Unexpected errors: log as error
             this.logger.error(`Unexpected error fetching weather data for user ${userId}:`, error);
             throw new HttpException(
@@ -86,7 +90,7 @@ export class WeatherService {
     private async getCoordinates(weatherDto: WeatherRequest): Promise<GeocodingResponse> {
         try {
             this.logger.debug(`Geocoding location: ${weatherDto.city}, ${weatherDto.country}`);
-            
+
             // Build query string for geocoding
             let query = weatherDto.city + ',' + weatherDto.country;
             const url = `${this.geocodingUrl}?q=${encodeURIComponent(query)}&limit=1&appid=${this.apiKey}`;
@@ -284,6 +288,8 @@ export class WeatherService {
 
     /**
      * Get user's weather query history
+     * @param userId - ID of the user
+     * @returns User's weather query history
      */
     async getUserWeatherQueries(userId: number): Promise<UserWeatherResponse> {
         try {
@@ -356,6 +362,7 @@ export class WeatherService {
 
     /**
      * Get all weather queries (Admin only)
+     * @returns List of all weather queries
      */
     async getAllWeatherQueries(): Promise<any[]> {
         try {

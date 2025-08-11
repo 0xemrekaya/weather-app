@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Case study requirement: External API Integration (10 Points)
  * OpenWeather API configuration with proper error handling
  */
 @Injectable()

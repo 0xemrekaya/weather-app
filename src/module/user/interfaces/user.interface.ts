@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UserResponseData } from "src/common/dto/user-response.dto";
-import { UserRoles } from "src/common/enums/user.enum";
+import { UserResponseData } from "../../../common/dto/user-response.dto";
+import { UserRoles } from "../../../common/enums/user.enum";
 
 
 // Create user input interface
