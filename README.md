@@ -106,7 +106,7 @@ The project follows the standard modular structure of NestJS. The main logic is 
 ### 1. Clone the Project
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/0xemrekaya/weather-app
 cd weather-app
 ```
 
