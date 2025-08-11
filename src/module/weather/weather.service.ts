@@ -8,7 +8,8 @@ import { CacheService } from '../cache/cache.service';
 import { DatabaseService } from '../database/database.service';
 import { WeatherData } from '../../common/interfaces/weather.interface';
 import { OpenWeatherConfig } from '../config/openweather.config';
-import { UserWeatherQuery, UserWeatherResponse } from './dto/user-weather-response.dto';
+import { UserWeatherQuery, UserWeatherResponse, PaginationMeta } from './dto/user-weather-response.dto';
+import { UserWeatherQueryParams } from './dto/user-weather-query.dto';
 
 @Injectable()
 export class WeatherService {
@@ -287,39 +288,58 @@ export class WeatherService {
     }
 
     /**
-     * Get user's weather query history
+     * Get user's weather query history with optimized single-query approach
      * @param userId - ID of the user
-     * @returns User's weather query history
+     * @param params - Query parameters for pagination, sorting, and filtering
+     * @returns User's weather query history with pagination
      */
-    async getUserWeatherQueries(userId: number): Promise<UserWeatherResponse> {
+    async getUserWeatherQueries(userId: number, params: UserWeatherQueryParams = {}): Promise<UserWeatherResponse> {
         try {
-            // Get user with their weather queries in a single query
-            const userWithQueries = await this.databaseService.user.findUnique({
-                where: { id: userId },
-                include: {
-                    weatherQueries: {
-                        include: {
-                            WeatherData: true,
-                        },
-                        orderBy: {
-                            queryTime: 'desc'
-                        },
-                        take: 50 // Limit to last 50 queries
-                    }
-                }
-            });
-
-            if (!userWithQueries) {
-                throw new HttpException(
-                    'User not found',
-                    HttpStatus.NOT_FOUND,
-                );
+            const { page = 1, limit = 20, sortBy = 'queryTime', sortOrder = 'desc', city } = params;
+            const skip = (page - 1) * limit;
+            
+            // Build where clause for filtering
+            const whereClause: any = { userId };
+            if (city) {
+                whereClause.city = {
+                    contains: city,
+                    mode: 'insensitive'
+                };
             }
 
-            const queries = userWithQueries.weatherQueries;
+            // Single optimized query with count and data
+            const [weatherQueries, total] = await this.databaseService.$transaction([
+                // Get paginated data
+                this.databaseService.weatherQuery.findMany({
+                    where: whereClause,
+                    include: {
+                        WeatherData: {
+                            select: {
+                                main: true,
+                                description: true,
+                                icon: true,
+                                temperature: true,
+                                feelsLike: true,
+                                humidity: true,
+                                tempMax: true,
+                                tempMin: true,
+                            }
+                        }
+                    },
+                    orderBy: {
+                        [sortBy]: sortOrder
+                    },
+                    skip,
+                    take: limit
+                }),
+                // Get total count
+                this.databaseService.weatherQuery.count({
+                    where: whereClause
+                })
+            ]);
 
-            // Transform data for response
-            const transformedQueries: UserWeatherQuery[] = queries.map(query => ({
+            // Transform data efficiently
+            const transformedQueries: UserWeatherQuery[] = weatherQueries.map(query => ({
                 id: userId,
                 queryId: query.id,
                 city: query.city,
@@ -336,18 +356,15 @@ export class WeatherService {
                 } : null
             }));
 
+            const pagination = this.createPaginationMeta(page, limit, total);
+
             return {
                 queries: transformedQueries,
-                total: transformedQueries.length
+                pagination
             };
         } catch (error) {
             // Differentiate between expected business logic errors and system errors
             if (error instanceof HttpException) {
-                if (error.getStatus() === HttpStatus.NOT_FOUND) {
-                    this.logger.warn(`User ${userId} not found for weather history request`);
-                } else {
-                    this.logger.warn(`Business logic error for user ${userId}: ${error.message}`);
-                }
                 throw error;
             }
 
@@ -358,6 +375,21 @@ export class WeatherService {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
+    }
+
+    /**
+     * Create pagination metadata
+     */
+    private createPaginationMeta(page: number, limit: number, total: number): PaginationMeta {
+        const totalPages = Math.ceil(total / limit);
+        return {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1
+        };
     }
 
     /**

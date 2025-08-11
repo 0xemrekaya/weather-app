@@ -2,7 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginRequest } from '../dto/login-request.dto';
 import { LoginResponse } from '../dto/login-response.dto';
-import { ErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
+import { ErrorResponse, RateLimitErrorResponse, ValidationErrorResponse } from '../../../common/dto/error-response.dto';
 
 // Swagger decorator for user login 
 export function ApiLoginSwagger() {
@@ -34,6 +34,11 @@ export function ApiLoginSwagger() {
             status: 404,
             description: 'User not found',
             type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 429,
+            description: 'Rate limit exceeded',
+            type: RateLimitErrorResponse
         }),
         ApiResponse({
             status: 500,

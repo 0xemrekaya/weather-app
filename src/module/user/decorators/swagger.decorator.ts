@@ -2,7 +2,7 @@ import { applyDecorators } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { CreateUserRequest } from "../dto/create-user-request.dto";
 import { CreateUserResponse } from "../dto/create-user-response.dto";
-import { ErrorResponse, ValidationErrorResponse } from "../../../common/dto/error-response.dto";
+import { ErrorResponse, RateLimitErrorResponse, ValidationErrorResponse } from "../../../common/dto/error-response.dto";
 import { GetAllUserResponse } from "../dto/get-all-user-response.dto";
 
 // Swagger decorators for create-user endpoint
@@ -43,6 +43,11 @@ export function ApiCreateUserSwagger() {
             type: ErrorResponse
         }),
         ApiResponse({
+            status: 429,
+            description: 'Rate limit exceeded',
+            type: RateLimitErrorResponse
+        }),
+        ApiResponse({
             status: 500,
             description: 'Internal server error',
             type: ErrorResponse
@@ -69,6 +74,11 @@ export function ApiGetUserAllSwagger() {
             status: 403,
             description: 'Forbidden - Admin access required',
             type: ErrorResponse
+        }),
+        ApiResponse({
+            status: 429,
+            description: 'Rate limit exceeded',
+            type: RateLimitErrorResponse
         }),
         ApiResponse({
             status: 500,

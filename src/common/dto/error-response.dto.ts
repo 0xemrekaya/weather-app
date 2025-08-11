@@ -87,3 +87,46 @@ export class ValidationErrorResponse {
     })
     message: string[];
 }
+
+// Global Error limit response
+/*
+* @example
+* {
+*   "statusCode": 429,
+*   "timestamp": "2025-08-10T12:00:00.000Z",
+*   "method": "GET",
+*   "error": "Too Many Requests",
+*   "message": "Rate limit exceeded"
+* }
+*/
+export class RateLimitErrorResponse {
+    @ApiProperty({
+        description: 'HTTP status code',
+        example: 429,
+    })
+    statusCode: number;
+
+    @ApiProperty({
+        description: 'Timestamp when the error occurred',
+        example: '2025-08-10T12:00:00.000Z',
+    })
+    timestamp: string;
+
+    @ApiProperty({
+        description: 'HTTP method used',
+        example: 'GET',
+    })
+    method: string;
+
+    @ApiProperty({
+        description: 'Error type',
+        example: 'Too Many Requests',
+    })
+    error: string;
+
+    @ApiProperty({
+        description: 'Detailed error message',
+        example: 'Rate limit exceeded',
+    })
+    message: string;
+}

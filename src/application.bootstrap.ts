@@ -23,13 +23,14 @@ export class ApplicationBootstrap {
         const port = this.getPort();
         await this.app.listen(port);
 
+        this.logRateLimitInfo();
         this.logApplicationInfo(port);
     }
 
     private setupGlobalConfiguration(app: INestApplication): void {
         // Enable CORS
         const corsOrigins = this.configService.get<string>('CORS_ORIGIN')?.split(',') || ['http://localhost:3000', 'http://localhost:3001'];
-        
+
         app.enableCors({
             origin: corsOrigins,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -60,7 +61,9 @@ export class ApplicationBootstrap {
         const config = new DocumentBuilder()
             .setTitle('Weather App API')
             .setDescription(
-                'Weather application with role-based access control and OpenWeather API integration'
+                'Weather application with role-based access control, OpenWeather API integration, and global rate limiting\n\n' +
+                '**Rate Limits:**\n' +
+                '- All endpoints: 10 requests per 5 seconds (IP-based)'
             )
             .setVersion('1.0')
             .addTag('auth', 'Authentication endpoints')
@@ -80,6 +83,11 @@ export class ApplicationBootstrap {
     private logApplicationInfo(port: number): void {
         this.logger.log(`Application is running on: http://localhost:${port}`);
         this.logger.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+    }
+
+    private logRateLimitInfo(): void {
+        this.logger.log('Rate Limiting Configuration:');
+        this.logger.log('  Global: 10 requests per 5 seconds for all endpoints');
     }
 
     private setupGracefulShutdown(): void {

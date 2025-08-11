@@ -9,6 +9,7 @@ import { ApiGetUserWeatherHistorySwagger, ApiWeatherSwagger } from './decorators
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserWeatherResponse } from './dto/user-weather-response.dto';
 import { WeatherResponse } from './dto/weather-response.dto';
+import { UserWeatherQueryParams } from './dto/user-weather-query.dto';
 
 @ApiTags('weather')
 @Controller('weather')
@@ -28,9 +29,12 @@ export class WeatherController {
     @Get('history')
     @HttpCode(HttpStatus.OK)
     @ApiGetUserWeatherHistorySwagger() // Swagger documentation for getting user weather history
-    async getUserselfWeatherHistory(@Request() req: any): Promise<UserWeatherResponse> {
+    async getUserselfWeatherHistory(
+        @Request() req: any,
+        @Query() queryParams: UserWeatherQueryParams
+    ): Promise<UserWeatherResponse> {
         const userId = req.user.id;
-        return this.weatherService.getUserWeatherQueries(userId);
+        return this.weatherService.getUserWeatherQueries(userId, queryParams);
     }
 
     @Get('history/user/:userId')
@@ -38,7 +42,10 @@ export class WeatherController {
     @Roles(UserRoles.admin)
     @HttpCode(HttpStatus.OK)
     @ApiGetUserWeatherHistorySwagger() // Swagger documentation for admin to get another user's weather history with User ID
-    async getSpecificUserWeatherHistory(@Param('userId', ParseIntPipe) userId: number): Promise<UserWeatherResponse> {
-        return this.weatherService.getUserWeatherQueries(userId);
+    async getSpecificUserWeatherHistory(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Query() queryParams: UserWeatherQueryParams
+    ): Promise<UserWeatherResponse> {
+        return this.weatherService.getUserWeatherQueries(userId, queryParams);
     }
 }
