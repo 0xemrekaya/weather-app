@@ -7,11 +7,13 @@ services:
       POSTGRES_DB: weather_app
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
+    expose:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - weather-app-network
 
   # Redis service
   redis:
@@ -19,12 +21,84 @@ services:
     container_name: weather-app-redis
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-    ports:
+    expose:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - weather-app-network
+
+  # Weather App service
+  weather-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: weather-app-backend
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/weather_app?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SALT_ROUNDS: ${JWT_SALT_ROUNDS}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      OPENWEATHER_GEOCODING_URL: ${OPENWEATHER_GEOCODING_URL}
+      OPENWEATHER_WEATHER_URL: ${OPENWEATHER_WEATHER_URL}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DB: ${REDIS_DB}
+      CACHE_TTL: ${CACHE_TTL}
+      CACHE_MAX_ITEMS: ${CACHE_MAX_ITEMS}
+      THROTTLE_SHORT_TTL: ${THROTTLE_SHORT_TTL}
+      THROTTLE_SHORT_LIMIT: ${THROTTLE_SHORT_LIMIT}
+      THROTTLE_MEDIUM_TTL: ${THROTTLE_MEDIUM_TTL}
+      THROTTLE_MEDIUM_LIMIT: ${THROTTLE_MEDIUM_LIMIT}
+      THROTTLE_LONG_TTL: ${THROTTLE_LONG_TTL}
+      THROTTLE_LONG_LIMIT: ${THROTTLE_LONG_LIMIT}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - weather-app-network
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: weather-app-prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - weather-app
+    networks:
+      - weather-app-network
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: weather-app-grafana
+    ports:
+      - 8080:3000
+    depends_on:
+      - weather-app
+    volumes:
+      - grafana_storage:/var/lib/grafana
+    networks:
+      - weather-app-network
 
 volumes:
   postgres_data:
   redis_data:
+  grafana_storage:
+
+networks:
+  weather-app-network:
+    driver: bridge
