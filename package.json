@@ -21,11 +21,7 @@
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d --build",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f weather-app",
-    "db:seed": "ts-node prisma/seed.ts"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "docker:logs": "docker-compose logs -f weather-app"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

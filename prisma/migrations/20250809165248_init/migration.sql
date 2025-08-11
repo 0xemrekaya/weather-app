@@ -41,6 +41,10 @@ CREATE TABLE "public"."WeatherData" (
     CONSTRAINT "WeatherData_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateUser
+INSERT INTO "public"."User" ("email", "username", "password", "role", "createdAt", "updatedAt") VALUES
+('admin@example.com', 'admin', '$2a$12$UBNzG20rtpkTNhGG1rLXYOE1Gax3duhHeP9CcekBszI0gRY6Da/Ja', 'admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 

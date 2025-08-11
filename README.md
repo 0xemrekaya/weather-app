@@ -167,6 +167,14 @@ npx prisma migrate dev
 npm run start:dev
 ```
 
+### 5. Access the API
+
+There is a already created a admin.
+```
+username = admin
+password = password
+```
+
 ## Roles and Permissions
 
 The system has two different user roles:
