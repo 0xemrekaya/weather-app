@@ -30,6 +30,15 @@ export class CacheService implements OnModuleInit {
         }
     }
 
+    async onModuleDestroy(): Promise<void> {
+        try {
+            await this.cacheManager.disconnect();
+            this.logger.log('Cache store connection closed');
+        } catch (error) {
+            this.logger.error('Error closing cache store connection:', error.message);
+        }
+    }
+
     /**
      * Get cached weather data with proper error handling
      */
@@ -37,7 +46,7 @@ export class CacheService implements OnModuleInit {
         try {
             const cacheKey = this.generateWeatherCacheKey(city, country);
             this.logger.debug(`Cache GET attempt - Key: ${cacheKey} for ${city}, ${country}`);
-            
+
             const cachedData = await this.cacheManager.get<WeatherData>(cacheKey);
 
             if (cachedData) {

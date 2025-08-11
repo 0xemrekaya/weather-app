@@ -23,6 +23,7 @@ import { JwtConfig } from '../config/jwt.config';
             inject: [JwtConfig],
         }),
         UserModule,
+        ConfigModule, // Import ConfigModule to access JwtConfig
     ],
     controllers: [AuthController],
     providers: [

@@ -37,4 +37,4 @@ import { CacheConfig } from '../../module/config/cache.config';
     providers: [CacheService],
     exports: [CacheService, NestCacheModule],
 })
-export class CacheModule { }
+export class CacheModule {}

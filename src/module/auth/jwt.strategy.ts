@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 
 import { JwtPayload } from "./interfaces/jwt.interface";
 import { UserRoles } from "src/common/enums/user.enum";
+import { JwtConfig } from "../config/jwt.config";
 
 // User interface for validated user
 interface ValidatedUser {
@@ -15,11 +16,11 @@ interface ValidatedUser {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor() {
+    constructor(private readonly jwtConfig: JwtConfig) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+            secretOrKey: jwtConfig.secret,
         });
     }
 
