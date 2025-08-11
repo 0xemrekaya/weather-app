@@ -20,6 +20,7 @@ This project is a RESTful API service developed with NestJS that allows users to
 - **Graceful Shutdown:** Ensures the application terminates cleanly, preventing data loss.
 - **Health Check:** An endpoint to monitor application status.
 - **Containerization:** Easy setup and deployment with Docker and Docker Compose.
+- **CI/CD** Github Actions for testing and deployment.
 
 
 ## System Architecture
