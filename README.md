@@ -246,8 +246,8 @@ Below is a description of the variables that should be in the `.env` file.
 | `JWT_SECRET`              | Secret key used to sign JWT tokens                     | `mysecretkeyforauthentication123456`                                      |
 | `JWT_SALT_ROUNDS`         | Number of salt rounds for password hashing             | `12`                                                                      |
 | `CORS_ORIGIN`             | Allowed origins (comma-separated)                      | `http://localhost:3000,http://localhost:3001`                             |
-| `OPENWEATHER_API_KEY`     | OpenWeatherMap API key                                 | `3a0f9539558ffcb32f6d0967fe7f4991`                                         |
-| `OPENWEATHER_GEOCODING_URL`| OpenWeatherMap Geocoding API URL                       | `http://api.openweathermap.org/geo/1.0/direct`                            |
+| `OPENWEATHER_API_KEY`     | OpenWeatherMap API key                                 | `OpenWeatherMap-API-Key`                                                  |
+| `OPENWEATHER_GEOCODING_URL`| OpenWeatherMap Geocoding API URL                      | `http://api.openweathermap.org/geo/1.0/direct`                            |
 | `OPENWEATHER_WEATHER_URL` | OpenWeatherMap Weather API URL                         | `https://api.openweathermap.org/data/2.5/weather`                         |
 | `REDIS_HOST`              | Redis server address                                   | `localhost`                                                               |
 | `REDIS_PORT`              | Redis server port                                      | `6379`                                                                    |
